@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Notas Rápidas</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #00fd54;
+            --danger: #e74c3c;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 { color: var(--primary); }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button#add-btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button#add-btn:hover { background-color: #357abd; }
+
+        .notes-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .note-item {
+            background: var(--card-bg);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Mis Notas</h1>
+    
+    <div class="input-group">
+        <input type="text" id="note-input" placeholder="Escribe una nota nueva...">
+        <button id="add-btn">Agregar</button>
+    </div>
+
+    <ul id="notes-list" class="notes-list"></ul>
+</div>
+
+<script>
+    const input = document.getElementById('note-input');
+    const addBtn = document.getElementById('add-btn');
+    const notesList = document.getElementById('notes-list');
+
+    // Cargar notas al iniciar
+    document.addEventListener('DOMContentLoaded', getNotes);
+
+    addBtn.addEventListener('click', addNote);
+
+    function addNote() {
+        if (input.value === '') return;
+
+        const noteText = input.value;
+        saveLocalNotes(noteText);
+
+        createNoteElement(noteText);
+        input.value = '';
+    }
+
+    function createNoteElement(text) {
+        const li = document.createElement('li');
+        li.classList.add('note-item');
+        li.innerHTML = `
+            <span>${text}</span>
+            <button class="delete-btn" onclick="removeNote(this)">Eliminar</button>
+        `;
+        notesList.appendChild(li);
+    }
+
+    function removeNote(btn) {
+        const item = btn.parentElement;
+        const text = item.querySelector('span').innerText;
+        removeLocalNotes(text);
+        item.remove();
+    }
+
+    // --- LOCAL STORAGE LOGIC ---
+
+    function saveLocalNotes(note) {
+        let notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+        notes.push(note);
+        localStorage.setItem('notes', JSON.stringify(notes));
+    }
+
+    function getNotes() {
+        let notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+        notes.forEach(note => createNoteElement(note));
+    }
+
+    function removeLocalNotes(noteText) {
+        let notes = JSON.parse(localStorage.getItem('notes'));
+        const filteredNotes = notes.filter(n => n !== noteText);
+        localStorage.setItem('notes', JSON.stringify(filteredNotes));
+    }
+</script>
+
+</body>
+</html>
